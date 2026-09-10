@@ -51,6 +51,13 @@ NOBSS = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]
 EFFECTS = [10 ** (k / 25 - 1) for k in range(50)]   # 0.1 .. ~9.1
 NOISES = [0, 1, 2, 4, 10, 20, 50]
 
+# Palette matching the paper: noise level -> color (pink, orange, gold,
+# yellow-green, green, sky blue, purple).
+NOISE_COLORS = {
+    0: "#ff4fa3", 1: "#ff8a3d", 2: "#f5c518", 4: "#c3d940",
+    10: "#5ec98a", 20: "#63c6e8", 50: "#9d81d6",
+}
+
 
 def create_snapshot(seed, noise=0.0, n_obs=50000, treated=0.0,
                     treatment_effect=0.0, season_effect=0.0, alt=False):
@@ -145,20 +152,14 @@ def compute_grid(nobss, effects, noises, n_change_seeds, n_boot, seed=12345):
 # ----------------------------------------------------------------------
 # Power figures
 # ----------------------------------------------------------------------
-def _noise_colors():
-    cmap = plt.get_cmap("cool")
-    return [cmap(i / (len(NOISES) - 1)) for i in range(len(NOISES))]
-
-
 def plot_power_vs_effect(grid, nobs, outfile):
-    colors = _noise_colors()
     fig, ax = plt.subplots()
     sub = grid[grid["nobs"] == nobs]
     effects = sorted(sub["effect"].unique())
-    for i, noise in enumerate(NOISES):
+    for noise in NOISES:
         ys = [sub[(sub["effect"] == e) & (sub["noise"] == noise)]["detection_rate"].mean()
               for e in effects]
-        ax.plot(effects, ys, label=str(noise), color=colors[i], linewidth=3)
+        ax.plot(effects, ys, label=str(noise), color=NOISE_COLORS[noise], linewidth=3)
     ax.set_xticks([1, 2, 4, 10])
     ax.tick_params(labelsize=15)
     ax.set_xlabel("Effect size", fontsize=15)
@@ -172,7 +173,11 @@ def plot_power_vs_effect(grid, nobs, outfile):
 
 
 def plot_power_rescaled(grid, outfile):
-    cmap = plt.get_cmap("cool")
+    # Sample size -> color, teal (small N) through violet to salmon (large N),
+    # matching the paper's gradient.
+    from matplotlib.colors import LinearSegmentedColormap
+    cmap = LinearSegmentedColormap.from_list(
+        "teal_salmon", ["#1fb0a6", "#5aa7d6", "#8b7fd0", "#c86fb0", "#f2948b"])
     colors = [cmap(i / (len(NOBSS) - 1)) for i in range(len(NOBSS))]
     fig = plt.figure(figsize=(15, 5))
     ax = fig.add_subplot(111)
