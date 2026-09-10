@@ -103,8 +103,8 @@ def main():
         frac = pct / 100.0
         reps = [beta_for_subset(d, frac, p=frac) for _ in range(N_REPS)]
         estims.append(np.mean(reps))
-        lbs.append(np.percentile(reps, 10))
-        ubs.append(np.percentile(reps, 90))
+        lbs.append(np.percentile(reps, 5))
+        ubs.append(np.percentile(reps, 95))
     print(f"National estimate at 50% treated: {estims[percentages.index(50)]:.1f} "
           f"(true |effect| = {abs(real_effect):.1f})")
 
@@ -147,7 +147,7 @@ def main():
         for key, sub in subsets.items():
             reps = [beta_for_subset(sub, 0.5, p=0.5) for _ in range(N_REPS)]
             reps = [0 if np.isnan(r) else r for r in reps]
-            out[key] = (np.mean(reps), np.percentile(reps, 10), np.percentile(reps, 90))
+            out[key] = (np.mean(reps), np.percentile(reps, 5), np.percentile(reps, 95))
         return out
 
     state_subsets = {s: d[d["state_alpha"] == s].reset_index(drop=True) for s in valid}
