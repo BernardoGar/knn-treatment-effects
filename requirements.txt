@@ -1,0 +1,12 @@
+# Core analysis (scripts 01-03 and src/knn_te.py)
+numpy>=1.23
+pandas>=1.5
+scipy>=1.9
+scikit-learn>=1.1
+matplotlib>=3.6
+
+# Only needed to rebuild the drought dataset from raw sources
+# (scripts/build_drought_dataset.py). The analysis scripts read the cached
+# CSV and do not require these.
+pyshp>=2.3
+utm>=0.7
